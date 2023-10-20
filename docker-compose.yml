@@ -1,0 +1,23 @@
+version: '3'
+services:
+  # Database service
+  database:
+    image: 'postgres:latest'
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+  # SMTP Mailing service
+  mail:
+    image: 'mailhog/mailhog'
+    ports:
+      # SMTP
+      - 1025:1025
+      # HTTP
+      - 8025:8025
+volumes:
+  database-data:
+
+  
