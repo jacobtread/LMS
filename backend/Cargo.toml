@@ -2,5 +2,30 @@
 name = "backend"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
+license = "MIT"
+authors = ["Jacobtread <jacobtread@gmail.com>"]
+repository = "https://github.com/jacobtread/LMS"
+
 
 [dependencies]
+dotenvy = "0.15"
+argon2 = { version = "0.5", features = ["std"] }
+jsonwebtoken = "9"
+validator = { version = "0.16", features = ["derive"] }
+
+axum = { version = "0.6", features = ["headers", "http2"] }
+hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.4", features = ["full"] }
+
+serde = { version = "1", features = ["derive"] }
+sailfish = "0.8"
+lettre = "0.11"
+
+log = { version = "0.4", features = ["serde"] }
+log-panics = { version = "2", features = ["with-backtrace"] }
+
+thiserror = "1"
+email_address = "0.2"
