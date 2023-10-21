@@ -4,24 +4,76 @@ Table user {
   last_name string
   email string
 
+  // When the course was created
+  created_at datetime
+  // When the course was last modified
+  modified_at datetime
+
   indexes {
     email [unique]
+  }
+}
+
+// Group of users
+Table group {
+  id integer [pk, increment]
+  // Name of the group
+  name string
+
+  // When the course was created
+  created_at datetime
+  // When the course was last modified
+  modified_at datetime
+}
+
+// Junction table between users and groups
+Table user_groups {
+  // User this mapping belongs to
+  user_id integer
+  // Group this mapping is for
+  group_id integer
+
+  indexes {
+    // Composite primary key from the mapping
+    (user_id, group_id) [pk]
+  }
+}
+
+Ref: user_groups.user_id > user.id [delete: cascade]
+Ref: user_groups.group_id > group.id [delete: cascade]
+
+// Junction table between groups and courses with an associated permision
+Table group_courses {
+  // Group this mapping is for
+  group_id integer [ref: > group.id]
+  // Course this mapping is for
+  course_id integer [ref: > course.id]
+  // Comma seperated collection of permissions
+  permissions string
+
+  indexes {
+    // Composite primary key from the mapping
+    (group_id, course_id) [pk]
   }
 }
 
 Enum user_role {
   // Standard access to the platform
   "STANDARD"
+  //
+  ""
   // Management access 
   "MANAGER"
+  // 
+  "SYSTEM"
 }
 
 // Junction table between users and courses with an associated permision
 Table user_courses {
   // User this mapping belongs to
-  user_id integer [ref: > user.id]
+  user_id integer
   // Course this mapping is for
-  course_id integer [ref: > course.id]
+  course_id integer
   // Comma seperated collection of permissions
   permissions string
 
@@ -31,10 +83,13 @@ Table user_courses {
   }
 }
 
+Ref: user_courses.user_id > user.id [delete: cascade]
+Ref: user_courses.course_id > course.id [delete: cascade]
+
 Table course { 
   id integer [pk, increment]
   // The ID of the user that created this module
-  author_id integer [ref: > user.id]
+  author_id integer [null]
 
   // Course tittle
   title string
@@ -47,19 +102,29 @@ Table course {
   modified_at datetime
 }
 
+Ref: course.author_id > user.id [delete: set null]
+
 // Junction table between courses and modules
 Table course_modules {
     // Course this mapping is for
-  course_id integer [ref: > course.id]
+  course_id integer
   // Course this mapping is for
-  module_id integer [ref: > module.id]
+  module_id integer
+  
+  indexes {
+    // Composite primary key from the mapping
+    (course_id, module_id) [pk]
+  }
 }
+
+Ref: course_modules.course_id > course.id [delete: cascade]
+Ref: course_modules.module_id > module.id [delete: cascade]
 
 /// Individual module within a course
 Table module {
   id integer [pk, increment]
   // The ID of the user that created this module
-  author_id integer [ref: > user.id]
+  author_id integer [null]
 
   // Name of the module
   name string
@@ -67,7 +132,7 @@ Table module {
   description string
 
   // Visible order for displaying the module
-  order int
+  position int
 
   // When the module was created
   created_at datetime
@@ -75,19 +140,30 @@ Table module {
   modified_at datetime
 }
 
+Ref: module.author_id > user.id [delete: set null]
+
 // Junction table between modules and topics
 Table modules_topics {
   // Course this mapping is for
-  module_id integer [ref: > module.id]
+  module_id integer
   // Course this mapping is for
-  topic_id integer [ref: > topic.id]
+  topic_id integer
+
+  indexes {
+    // Composite primary key from the mapping
+    (module_id, topic_id) [pk]
+  }
 }
+
+Ref: modules_topics.module_id > module.id [delete: cascade]
+Ref: modules_topics.topic_id > topic.id [delete: cascade]
+
 
 Table topic {
   id integer [pk, increment]
 
   // The ID of the user that created this module
-  author_id integer [ref: > user.id]
+  author_id integer [null]
 
   // Title of the individual topic
   title string
@@ -95,10 +171,78 @@ Table topic {
   content json
 
   // Visible order for displaying the topic
-  order int
+  position int
   
   // When the topic was created
   created_at datetime
   // When the topic was last modified
+  modified_at datetime
+}
+
+Ref: topic.author_id > user.id [delete: set null]
+
+
+// Junction table between modules and topics
+Table modules_assessments {
+  // Course this mapping is for
+  module_id integer
+  // Course this mapping is for
+  asessment_id integer
+
+  indexes {
+    // Composite primary key from the mapping
+    (module_id, asessment_id) [pk]
+  }
+}
+
+Ref: modules_assessments.module_id > module.id [delete: cascade]
+Ref: modules_assessments.asessment_id > assessment.id [delete: cascade]
+
+Table assessment {
+  id integer [pk, increment]
+
+  // The ID of the user that created this module
+  author_id integer [null]
+
+  // Visible order for displaying the assessment
+  position int
+
+  // Title of the individual topic
+  title string
+  // JSON encoded course content blocks
+  content json
+
+  // File for the student
+  student_file integer [null]
+  // File for the marker (Marking guide)
+  marker_file integer [null]
+
+  // When the assessment was created
+  created_at datetime
+  // When the assessment was last modified
+  modified_at datetime
+}
+
+Ref: assessment.author_id > user.id [delete: set null]
+Ref: assessment.student_file > file.id [delete: set null]
+Ref: assessment.marker_file > file.id [delete: set null]
+
+Table file {
+  id integer [pk, increment]
+  // Original name of the file
+  name string
+  // Value path for the file
+  value string
+  // URL for the value
+  url string
+  // File mime type
+  mime_type string
+  // Size of the file
+  size int
+  // Associated file metadata
+  meta json
+  // When the file was created
+  created_at datetime
+  // When the file was last modified
   modified_at datetime
 }
