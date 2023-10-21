@@ -1,0 +1,104 @@
+Table user {
+  id integer [pk, increment]
+  first_name string
+  last_name string
+  email string
+
+  indexes {
+    email [unique]
+  }
+}
+
+Enum user_role {
+  // Standard access to the platform
+  "STANDARD"
+  // Management access 
+  "MANAGER"
+}
+
+// Junction table between users and courses with an associated permision
+Table user_courses {
+  // User this mapping belongs to
+  user_id integer [ref: > user.id]
+  // Course this mapping is for
+  course_id integer [ref: > course.id]
+  // Comma seperated collection of permissions
+  permissions string
+
+  indexes {
+    // Composite primary key from the mapping
+    (user_id, course_id) [pk]
+  }
+}
+
+Table course { 
+  id integer [pk, increment]
+  // The ID of the user that created this module
+  author_id integer [ref: > user.id]
+
+  // Course tittle
+  title string
+  // JSON encoded overview content blocks
+  overview json
+
+  // When the course was created
+  created_at datetime
+  // When the course was last modified
+  modified_at datetime
+}
+
+// Junction table between courses and modules
+Table course_modules {
+    // Course this mapping is for
+  course_id integer [ref: > course.id]
+  // Course this mapping is for
+  module_id integer [ref: > module.id]
+}
+
+/// Individual module within a course
+Table module {
+  id integer [pk, increment]
+  // The ID of the user that created this module
+  author_id integer [ref: > user.id]
+
+  // Name of the module
+  name string
+  // Description of the module
+  description string
+
+  // Visible order for displaying the module
+  order int
+
+  // When the module was created
+  created_at datetime
+  // When the module was last modified
+  modified_at datetime
+}
+
+// Junction table between modules and topics
+Table modules_topics {
+  // Course this mapping is for
+  module_id integer [ref: > module.id]
+  // Course this mapping is for
+  topic_id integer [ref: > topic.id]
+}
+
+Table topic {
+  id integer [pk, increment]
+
+  // The ID of the user that created this module
+  author_id integer [ref: > user.id]
+
+  // Title of the individual topic
+  title string
+  // JSON encoded course content blocks
+  content json
+
+  // Visible order for displaying the topic
+  order int
+  
+  // When the topic was created
+  created_at datetime
+  // When the topic was last modified
+  modified_at datetime
+}
